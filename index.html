@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="邻里优选会员经营分析作品集：Power BI 看板、会员召回、营销活动评估与飞书日报推送。">
+  <title>邻里优选｜会员经营分析作品集</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2307111f'/%3E%3Cpath d='M17 33.5 31 18l16 15.5V49H17Z' fill='none' stroke='%2322d3ee' stroke-width='4'/%3E%3Cpath d='M24 49V36h14v13' fill='none' stroke='%23a78bfa' stroke-width='4'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #07111f;
+      --panel: #0d1b2d;
+      --panel-2: #10243a;
+      --line: rgba(148, 190, 220, .18);
+      --line-strong: rgba(34, 211, 238, .38);
+      --text: #edf6ff;
+      --muted: #9fb6cb;
+      --cyan: #22d3ee;
+      --cyan-soft: #93e9f5;
+      --violet: #a78bfa;
+      --amber: #fbbf24;
+      --pink: #fb7185;
+      --green: #39d98a;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .30);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 84% -10%, rgba(34, 211, 238, .13), transparent 34rem),
+        radial-gradient(circle at 6% 32%, rgba(167, 139, 250, .10), transparent 27rem),
+        var(--ink);
+      font-family: "Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .shell { width: min(1180px, calc(100% - 44px)); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      border-bottom: 1px solid rgba(159, 182, 203, .10);
+      background: rgba(7, 17, 31, .84); backdrop-filter: blur(18px);
+    }
+    .nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .02em; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(34, 211, 238, .58); border-radius: 10px; color: var(--cyan); box-shadow: 0 0 28px rgba(34, 211, 238, .18); }
+    .brand-mark::before { content: "↗"; font-size: 20px; font-weight: 900; }
+    .nav-links { display: flex; gap: 24px; color: var(--muted); font-size: 14px; }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--cyan-soft); }
+    .hero { padding: 72px 0 42px; display: grid; grid-template-columns: 1.02fr .98fr; gap: 54px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; color: var(--cyan-soft); font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+    h1 { margin: 16px 0 17px; max-width: 640px; font-size: clamp(38px, 5vw, 66px); line-height: 1.10; letter-spacing: -.045em; }
+    .hero-copy { max-width: 580px; color: var(--muted); font-size: 18px; }
+    .hero-copy strong { color: var(--text); font-weight: 700; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 27px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 17px; border: 1px solid var(--line-strong); border-radius: 12px; color: var(--text); background: rgba(16, 36, 58, .78); font-weight: 750; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+    .btn:hover, .btn:focus-visible { transform: translateY(-2px); border-color: var(--cyan); background: rgba(20, 58, 82, .9); }
+    .btn.primary { color: #04131e; border-color: transparent; background: linear-gradient(135deg, var(--cyan), #80e8ed); box-shadow: 0 10px 30px rgba(34, 211, 238, .16); }
+    .hero-card { position: relative; padding: 12px; border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(145deg, rgba(16, 36, 58, .92), rgba(8, 20, 35, .92)); box-shadow: var(--shadow); }
+    .hero-card::before { content: ""; position: absolute; left: 28px; right: 28px; top: -1px; height: 2px; background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent); }
+    .hero-card img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid rgba(148, 190, 220, .18); }
+    .hero-card-caption { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 6px 2px; color: var(--muted); font-size: 13px; }
+    .hero-card-caption strong { color: var(--text); }
+    .status { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 8px 0 74px; }
+    .stat { padding: 19px 20px; border: 1px solid var(--line); border-radius: 15px; background: rgba(13, 27, 45, .78); }
+    .stat:nth-child(2) { border-color: rgba(167, 139, 250, .30); }
+    .stat:nth-child(3) { border-color: rgba(251, 191, 36, .30); }
+    .stat:nth-child(4) { border-color: rgba(57, 217, 138, .30); }
+    .stat-value { display: block; font-size: 30px; line-height: 1.1; font-weight: 850; letter-spacing: -.04em; }
+    .stat-label { display: block; margin-top: 6px; color: var(--muted); font-size: 14px; }
+    section { padding: 68px 0; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+    .section-heading h2 { margin: 0; font-size: clamp(27px, 3vw, 40px); line-height: 1.18; letter-spacing: -.03em; }
+    .section-heading p { max-width: 480px; margin: 0; color: var(--muted); }
+    .section-heading p.single-line { max-width: none; white-space: nowrap; }
+    .capabilities { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .capability { min-height: 220px; padding: 23px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(160deg, rgba(16, 36, 58, .88), rgba(13, 27, 45, .75)); transition: transform .2s ease, border-color .2s ease; }
+    .capability:hover { transform: translateY(-4px); border-color: var(--line-strong); }
+    .capability-number { color: var(--cyan); font-size: 13px; font-weight: 850; letter-spacing: .12em; }
+    .capability h3 { margin: 18px 0 9px; font-size: 20px; }
+    .capability p { margin: 0; color: var(--muted); font-size: 15px; }
+    .capability-tag { display: inline-block; margin-top: 18px; padding: 4px 9px; border: 1px solid rgba(34, 211, 238, .20); border-radius: 999px; color: var(--cyan-soft); font-size: 12px; }
+    .journey { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: rgba(13, 27, 45, .78); }
+    .journey-step { position: relative; padding: 25px 24px 27px; min-height: 165px; border-right: 1px solid var(--line); }
+    .journey-step:last-child { border-right: 0; }
+    .journey-step::after { content: "→"; position: absolute; top: 22px; right: 17px; color: rgba(34, 211, 238, .55); font-size: 22px; }
+    .journey-step:last-child::after { content: ""; }
+    .journey-step span { display: block; color: var(--muted); font-size: 13px; }
+    .journey-step strong { display: block; margin: 13px 0 5px; font-size: 18px; }
+    .journey-step p { margin: 0; color: var(--muted); font-size: 14px; }
+    .transfer-grid { margin-top: 2px; }
+    .transfer-card { min-height: 240px; }
+    .transfer-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 17px; }
+    .transfer-tags span { padding: 4px 9px; border: 1px solid rgba(34, 211, 238, .20); border-radius: 999px; color: var(--cyan-soft); font-size: 12px; }
+    .industry-panel { margin-top: 18px; padding: 25px; border: 1px solid var(--line); border-radius: 18px; background: rgba(13, 27, 45, .78); }
+    .industry-panel h3 { margin: 0 0 17px; font-size: 22px; }
+    .industry-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .industry-item { padding: 16px; border: 1px solid rgba(148, 190, 220, .13); border-radius: 13px; background: rgba(16, 36, 58, .58); }
+    .industry-item strong { display: block; margin-bottom: 6px; color: var(--text); font-size: 16px; }
+    .industry-item span { color: var(--muted); font-size: 14px; }
+    .transfer-note { display: flex; align-items: baseline; gap: 12px; margin-top: 13px; padding: 14px 16px; border-left: 2px solid var(--violet); border-radius: 0 10px 10px 0; color: var(--muted); background: rgba(167, 139, 250, .08); font-size: 14px; }
+    .transfer-note strong { color: var(--text); white-space: nowrap; }
+    .showcase { display: grid; grid-template-columns: .9fr 1.1fr; gap: 18px; align-items: stretch; }
+    .showcase-copy, .showcase-view { border: 1px solid var(--line); border-radius: 19px; background: rgba(13, 27, 45, .78); }
+    .showcase-copy { padding: 27px; }
+    .showcase-copy h3 { margin: 0 0 10px; font-size: 24px; }
+    .showcase-copy p { margin: 0; color: var(--muted); }
+    .showcase-tabs { display: grid; gap: 8px; margin-top: 24px; }
+    .tab { display: flex; align-items: center; gap: 12px; padding: 12px 13px; border: 1px solid transparent; border-radius: 11px; color: var(--muted); background: transparent; text-align: left; cursor: pointer; }
+    .tab:hover { color: var(--text); background: rgba(16, 36, 58, .72); }
+    .tab.active { border-color: rgba(34, 211, 238, .35); color: var(--text); background: linear-gradient(90deg, rgba(34, 211, 238, .13), rgba(167, 139, 250, .08)); }
+    .tab-index { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 26px; border-radius: 8px; color: #07111f; background: var(--cyan); font-size: 12px; font-weight: 900; }
+    .tab:nth-child(2) .tab-index { background: var(--violet); }
+    .tab:nth-child(3) .tab-index { background: var(--amber); }
+    .tab:nth-child(4) .tab-index { background: var(--pink); }
+    .showcase-view { padding: 12px; min-width: 0; }
+    .showcase-view img { display: block; width: 100%; max-height: 520px; object-fit: contain; border-radius: 12px; border: 1px solid rgba(148, 190, 220, .18); background: #081321; cursor: zoom-in; }
+    .view-caption { display: flex; justify-content: space-between; gap: 12px; padding: 12px 4px 0; color: var(--muted); font-size: 13px; }
+    .view-caption strong { color: var(--text); }
+    .feishu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .feishu-card { padding: 12px; border: 1px solid var(--line); border-radius: 19px; background: rgba(13, 27, 45, .78); }
+    .feishu-card img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: contain; border: 1px solid rgba(148, 190, 220, .18); border-radius: 12px; background: #081321; }
+    .feishu-card figcaption { padding: 13px 4px 3px; color: var(--muted); font-size: 14px; }
+    .feishu-card figcaption strong { display: block; margin-bottom: 3px; color: var(--text); font-size: 16px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .info-card { padding: 26px; border: 1px solid var(--line); border-radius: 18px; background: rgba(13, 27, 45, .78); }
+    .info-card h3 { margin: 0 0 12px; font-size: 22px; }
+    .info-card p { color: var(--muted); margin: 0; }
+    .check-list { display: grid; gap: 12px; margin: 18px 0 0; padding: 0; list-style: none; }
+    .check-list li { display: flex; gap: 11px; color: var(--muted); }
+    .check-list li::before { content: "✓"; color: var(--green); font-weight: 900; }
+    .source-note { color: var(--muted); font-size: 14px; }
+    .source-note strong { color: var(--text); }
+    .footer { padding: 34px 0 46px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .footer-row { display: flex; justify-content: space-between; gap: 20px; }
+    .modal { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; padding: 28px; background: rgba(3, 8, 16, .86); backdrop-filter: blur(12px); }
+    .modal.open { display: grid; }
+    .modal-inner { max-width: min(1180px, 96vw); max-height: 92vh; position: relative; }
+    .modal img { display: block; max-width: 100%; max-height: 86vh; border: 1px solid rgba(147, 233, 245, .42); border-radius: 14px; box-shadow: var(--shadow); }
+    .modal-close { position: absolute; right: -10px; top: -48px; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--text); background: var(--panel); cursor: pointer; font-size: 23px; line-height: 1; }
+    @media (max-width: 920px) {
+      .hero { grid-template-columns: 1fr; gap: 32px; padding-top: 48px; }
+      .hero-card { max-width: 720px; }
+      .capabilities { grid-template-columns: repeat(2, 1fr); }
+      .journey { grid-template-columns: repeat(2, 1fr); }
+      .industry-grid { grid-template-columns: repeat(2, 1fr); }
+      .journey-step:nth-child(2) { border-right: 0; }
+      .journey-step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .showcase { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 28px, 560px); }
+      .nav { min-height: 62px; align-items: flex-start; padding: 12px 0; }
+      .nav-links { gap: 4px 12px; flex-wrap: wrap; justify-content: flex-end; font-size: 12px; }
+      .brand { font-size: 14px; }
+      h1 { font-size: 42px; }
+      .hero-copy { font-size: 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); padding-bottom: 46px; }
+      .stat-value { font-size: 26px; }
+      section { padding: 48px 0; }
+      .section-heading { display: block; }
+      .section-heading p { margin-top: 10px; }
+      .section-heading p.single-line { white-space: normal; }
+      .capabilities, .journey, .split, .feishu-grid, .industry-grid { grid-template-columns: 1fr; }
+      .journey-step, .journey-step:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--line); }
+      .journey-step:last-child { border-bottom: 0; }
+      .journey-step::after { content: "↓"; top: auto; right: 25px; bottom: 20px; }
+      .journey-step:last-child::after { content: ""; }
+      .footer-row { display: block; }
+      .footer-row span { display: block; margin-top: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="回到页面顶部"><span class="brand-mark" aria-hidden="true"></span><span>邻里优选 · 会员经营分析</span></a>
+      <nav class="nav-links" aria-label="页面导航">
+        <a href="#capabilities">业务功能</a>
+        <a href="#showcase">看板展示</a>
+        <a href="#delivery">项目说明</a>
+        <a href="#transfer">可迁移性</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="shell">
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Business Analytics Portfolio</div>
+          <h1>把经营数据变成可以行动的会员运营闭环</h1>
+          <p class="hero-copy"><strong>邻里优选</strong>是一套面向社区零售场景的会员经营分析作品集：从经营总览，到识别沉默会员、分配召回动作，再到评估营销活动，最后通过日报和飞书推送把结论交到业务手里。</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#capabilities">查看业务功能 <span aria-hidden="true">↓</span></a>
+            <a class="btn" href="#showcase">浏览看板截图 <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img src="images/powerbi/01-经营总览.png" alt="邻里优选经营总览 Power BI 页面截图">
+          <div class="hero-card-caption"><span><strong>经营总览</strong> · 从指标看到经营结构</span><span class="status">功能展示版</span></div>
+        </div>
+      </section>
+
+      <div class="stats" aria-label="项目概览">
+        <div class="stat"><span class="stat-value">4页</span><span class="stat-label">Power BI业务看板</span></div>
+        <div class="stat"><span class="stat-value">2类</span><span class="stat-label">飞书日报状态展示</span></div>
+        <div class="stat"><span class="stat-value">A/B</span><span class="stat-label">营销活动对照评估</span></div>
+        <div class="stat"><span class="stat-value">闭环</span><span class="stat-label">洞察 → 动作 → 复盘</span></div>
+      </div>
+
+      <section id="capabilities">
+        <div class="section-heading">
+          <h2>最值得看的四项业务能力</h2>
+          <p class="single-line">页面不强调工具堆叠而是展示每项功能如何支持一个具体的经营决策</p>
+        </div>
+        <div class="capabilities">
+          <article class="capability"><div class="capability-number">01 / 经营判断</div><h3>经营总览</h3><p>集中查看GMV、实付、交易、活跃会员、复购率，以及城市和品类结构，快速判断经营盘面。</p><span class="capability-tag">先回答“现在怎么样”</span></article>
+          <article class="capability"><div class="capability-number">02 / 人群识别</div><h3>会员分层与流失预警</h3><p>按会员价值、活跃与风险识别沉默会员，给出高风险优先级和可执行的召回动作。</p><span class="capability-tag">再回答“该找谁”</span></article>
+          <article class="capability"><div class="capability-number">03 / 效果判断</div><h3>营销活动评估</h3><p>用实验组/对照组比较核销率、实付差、券让利和预算执行，帮助业务判断活动是否值得继续。</p><span class="capability-tag">判断“做了有没有用”</span></article>
+          <article class="capability"><div class="capability-number">04 / 触达执行</div><h3>日报与飞书推送</h3><p>把核心指标、异常提醒和行动建议整理成日报卡片，直接推送到业务沟通场景。</p><span class="capability-tag">最后回答“下一步做什么”</span></article>
+        </div>
+      </section>
+
+      <section aria-labelledby="journey-title">
+        <div class="section-heading"><h2 id="journey-title">一条完整的业务链路</h2><p class="single-line">从发现问题到执行动作每个页面都对应业务流程中的一个关键节点</p></div>
+        <div class="journey">
+          <div class="journey-step"><span>STEP 01</span><strong>看清盘面</strong><p>经营总览确认收入、交易与会员状态。</p></div>
+          <div class="journey-step"><span>STEP 02</span><strong>定位人群</strong><p>分层和风险模型筛出需要召回的会员。</p></div>
+          <div class="journey-step"><span>STEP 03</span><strong>评估策略</strong><p>活动页对比实验和对照，拆开收入与成本。</p></div>
+          <div class="journey-step"><span>STEP 04</span><strong>推动执行</strong><p>日报、预警和行动建议交给运营团队。</p></div>
+        </div>
+      </section>
+
+      <section id="showcase">
+        <div class="section-heading"><h2>功能展示墙</h2><p>点击左侧模块查看对应页面。图片用于展示功能和信息层级，不作为数据对齐验收证据。</p></div>
+        <div class="showcase">
+          <div class="showcase-copy">
+            <h3 id="view-title">经营总览</h3>
+            <p id="view-desc">把经营规模、城市结构、品类结构和月度趋势放在同一张图里，帮助管理者先建立全局判断。</p>
+            <div class="showcase-tabs" role="tablist" aria-label="看板页面选择">
+              <button class="tab active" type="button" role="tab" aria-selected="true" data-title="经营总览" data-desc="把经营规模、城市结构、品类结构和月度趋势放在同一张图里，帮助管理者先建立全局判断。" data-image="images/powerbi/01-经营总览.png"><span class="tab-index">01</span><span>经营总览</span></button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-title="会员运营" data-desc="从会员池、分层结构、风险金额和待召回名单四个角度，支持精细化会员运营。" data-image="images/powerbi/02-会员运营.png"><span class="tab-index">02</span><span>会员运营</span></button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-title="营销活动效果" data-desc="把核销率、实验/对照收入、券让利效率和预算执行率放到一个决策页面。" data-image="images/powerbi/03-营销活动效果.png"><span class="tab-index">03</span><span>营销活动效果</span></button>
+              <button class="tab" type="button" role="tab" aria-selected="false" data-title="优惠券策略与行动名单" data-desc="把高风险会员、潜在可挽回金额、行动建议和数据截止日期组织成执行视图。" data-image="images/powerbi/04-优惠券策略与行动名单.png"><span class="tab-index">04</span><span>优惠券策略与行动名单</span></button>
+            </div>
+          </div>
+          <div class="showcase-view"><img id="view-image" src="images/powerbi/01-经营总览.png" alt="经营总览页面截图，点击查看大图"><div class="view-caption"><strong id="view-caption">经营总览 · Power BI功能展示</strong><span>点击图片放大</span></div></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="feishu-title">
+        <div class="section-heading"><h2 id="feishu-title">把结论送到业务手里</h2><p>日报不是另一个孤立报表，而是把指标、异常和下一步动作压缩成可直接阅读的业务消息。</p></div>
+        <div class="feishu-grid">
+          <figure class="feishu-card"><img src="images/feishu/01-经营日报-有预警.png" alt="飞书经营日报有预警截图"><figcaption><strong>有预警：提醒业务优先处理</strong>当指标触发规则时，消息带出异常事实与行动建议。</figcaption></figure>
+          <figure class="feishu-card"><img src="images/feishu/02-经营日报-无预警.png" alt="飞书经营日报无预警截图"><figcaption><strong>无预警：确认经营状态</strong>没有异常时仍保留核心经营指标，让团队知道系统已完成巡检。</figcaption></figure>
+        </div>
+      </section>
+
+      <section id="delivery">
+        <div class="section-heading"><h2>项目说明</h2></div>
+        <div class="split">
+          <article class="info-card"><h3>业务价值</h3><ul class="check-list"><li>把分散指标整合成经营判断，而不是只展示单个数字。</li><li>把会员风险直接转成召回名单和动作建议。</li><li>把活动结果拆成收入、核销、让利和预算，支持下一步决策。</li><li>把日报和预警推到业务沟通工具，缩短从发现到执行的距离。</li></ul></article>
+          <article class="info-card"><h3>数据与实现</h3><p class="source-note"><strong>数据来源：</strong>使用网络公开数据思路与虚拟平台场景合成，用于展示完整业务功能，不强调真实业务数字对齐。</p><p class="source-note" style="margin-top:14px"><strong>实现方式：</strong>PostgreSQL + dbt + Power BI + Python日报与飞书机器人，形成从数据整理、看板分析到运营触达的完整链路。</p></article>
+        </div>
+      </section>
+
+      <section id="transfer" aria-labelledby="transfer-title">
+        <div class="section-heading"><h2 id="transfer-title">可迁移性</h2><p>保留业务闭环，替换输入、规则和输出，就能迁移到新的经营场景。</p></div>
+        <div class="capabilities transfer-grid">
+          <article class="capability transfer-card"><div class="capability-number">01 / 换数据源</div><h3>接入不同业务数据</h3><p>可从表格、关系型数据库、数据仓库或业务 API 接入交易、会员、商品、活动等数据。</p><div class="transfer-tags"><span>CSV / Excel</span><span>MySQL / PostgreSQL</span><span>API / 数仓</span></div></article>
+          <article class="capability transfer-card"><div class="capability-number">02 / 换指标</div><h3>按业务目标重选指标</h3><p>可以增加、删除或重定义 KPI，把“收入与复购”换成留存、客单价、毛利、线索转化等指标。</p><div class="transfer-tags"><span>KPI 组合</span><span>口径调整</span><span>维度下钻</span></div></article>
+          <article class="capability transfer-card"><div class="capability-number">03 / 换规则</div><h3>自行设置预警条件</h3><p>支持阈值、环比、同比、目标差距、异常波动、数据质量等触发方式，并按人群或业务线细分。</p><div class="transfer-tags"><span>阈值预警</span><span>趋势异常</span><span>质量门禁</span></div></article>
+          <article class="capability transfer-card"><div class="capability-number">04 / 换产出</div><h3>适配不同交付模板</h3><p>同一结论可以输出为看板、日报卡片、邮件摘要、Excel 清单或管理层周报，匹配不同团队的工作习惯。</p><div class="transfer-tags"><span>看板</span><span>飞书 / 邮件</span><span>清单 / 周报</span></div></article>
+        </div>
+        <div class="industry-panel">
+          <h3>换行业后，功能如何适配</h3>
+          <div class="industry-grid">
+            <div class="industry-item"><strong>电商平台</strong><span>把城市和品类换成渠道、店铺、商品与投放计划，重点看转化率、客单价、复购和活动 ROI。</span></div>
+            <div class="industry-item"><strong>连锁零售</strong><span>保留门店经营总览与会员召回，增加库存周转、缺货率、区域对比和店长行动清单。</span></div>
+            <div class="industry-item"><strong>SaaS 订阅</strong><span>把交易改为订阅与使用行为，围绕活跃率、续费率、扩容收入和客户健康度触发客户成功动作。</span></div>
+            <div class="industry-item"><strong>教育与本地生活</strong><span>将会员分层换成学员或用户分层，结合到课、核销、预约、评价等行为安排触达和回访。</span></div>
+          </div>
+          <div class="transfer-note"><strong>还可以继续扩展</strong><span>按角色展示不同指标，接收一线执行反馈，加入预算、库存、客户健康度等主题，让“分析—行动—反馈”继续闭环。</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+
+  <div class="modal" id="image-modal" role="dialog" aria-modal="true" aria-label="截图预览"><div class="modal-inner"><button class="modal-close" type="button" aria-label="关闭预览">×</button><img id="modal-image" src="" alt="大图预览"></div></div>
+  <script>
+    (() => {
+      const tabs = [...document.querySelectorAll('.tab')];
+      const title = document.getElementById('view-title');
+      const desc = document.getElementById('view-desc');
+      const image = document.getElementById('view-image');
+      const caption = document.getElementById('view-caption');
+      const modal = document.getElementById('image-modal');
+      const modalImage = document.getElementById('modal-image');
+      const closeButton = document.querySelector('.modal-close');
+      const selectTab = (tab) => {
+        tabs.forEach((item) => { item.classList.toggle('active', item === tab); item.setAttribute('aria-selected', item === tab ? 'true' : 'false'); });
+        title.textContent = tab.dataset.title;
+        desc.textContent = tab.dataset.desc;
+        image.src = tab.dataset.image;
+        image.alt = tab.dataset.title + '页面截图，点击查看大图';
+        caption.textContent = tab.dataset.title + ' · Power BI功能展示';
+      };
+      tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab)));
+      const openModal = () => { modalImage.src = image.src; modalImage.alt = image.alt; modal.classList.add('open'); closeButton.focus(); };
+      const closeModal = () => { modal.classList.remove('open'); image.focus(); };
+      image.addEventListener('click', openModal);
+      closeButton.addEventListener('click', closeModal);
+      modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    })();
+  </script>
+</body>
+</html>
